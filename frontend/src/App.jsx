@@ -22,7 +22,7 @@ function App() {
           element={<RegisterPage />}
         />
         <Route
-          path="/home"
+          path="/"
           element={<HomePage />}
         />
         <Route

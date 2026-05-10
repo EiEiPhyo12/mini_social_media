@@ -1,5 +1,15 @@
-import { MoreHorizontal } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import {
+  MoreHorizontal,
+  Heart,
+} from "lucide-react";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import API from "../../services/api";
 
 function PostCard({
   post,
@@ -9,15 +19,41 @@ function PostCard({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  const [liked, setLiked] = useState(false);
+
+  const [likesCount, setLikesCount] =
+    useState(post.likes?.length || 0);
+
+  const [showComments, setShowComments] =
+    useState(false);
+
+  const [commentText, setCommentText] =
+    useState("");
+
+  // ✅ FIX: use state instead of mutating props
+  const [comments, setComments] = useState(post.comments || []);
+
   const isOwner = post.user_id === currentUserId;
 
   // =====================
-  // CLOSE ON OUTSIDE CLICK
+  // CHECK LIKE STATUS
   // =====================
   useEffect(() => {
+    if (!post.likes) return;
 
+    const hasLiked = post.likes.some(
+      (like) => like.user_id === currentUserId
+    );
+
+    setLiked(hasLiked);
+  }, [post.likes, currentUserId]);
+
+  // =====================
+  // CLOSE MENU OUTSIDE CLICK
+  // =====================
+  useEffect(() => {
     const handleClickOutside = (event) => {
-
       if (
         menuRef.current &&
         !menuRef.current.contains(event.target)
@@ -31,8 +67,48 @@ function PostCard({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-
   }, []);
+
+  // =====================
+  // LIKE POST
+  // =====================
+  const handleLike = async () => {
+    try {
+      await API.post(`/posts/${post.ID}/like`);
+
+      if (liked) {
+        setLiked(false);
+        setLikesCount((prev) => prev - 1);
+      } else {
+        setLiked(true);
+        setLikesCount((prev) => prev + 1);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // =====================
+  // ADD COMMENT (FIXED)
+  // =====================
+  const handleComment = async () => {
+    if (!commentText.trim()) return;
+
+    try {
+      const res = await API.post(
+        `/posts/${post.ID}/comments`,
+        { content: commentText }
+      );
+
+      // ✅ FIX: update state properly (NOT post.comments.push)
+      setComments((prev) => [...prev, res.data]);
+
+      setCommentText("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
 
@@ -40,6 +116,7 @@ function PostCard({
       <div className="flex items-center justify-between p-4 relative">
 
         <div className="flex items-center gap-3">
+
           {post.user?.avatar ? (
             <img
               src={post.user.avatar}
@@ -48,10 +125,7 @@ function PostCard({
             />
           ) : (
             <div className="w-11 h-11 rounded-full bg-blue-900 text-white flex items-center justify-center font-semibold">
-
               {post.user?.username?.charAt(0).toUpperCase() || "U"}
-
-
             </div>
           )}
 
@@ -59,13 +133,14 @@ function PostCard({
             <h4 className="font-semibold text-slate-800 text-sm">
               {post.user?.username}
             </h4>
+
             <p className="text-xs text-slate-500">
               {new Date(post.CreatedAt).toLocaleString()}
             </p>
           </div>
         </div>
 
-        {/* 3 DOT MENU */}
+        {/* MENU */}
         {isOwner && (
           <div ref={menuRef} className="relative">
 
@@ -76,7 +151,6 @@ function PostCard({
               <MoreHorizontal size={18} />
             </button>
 
-            {/* DROPDOWN */}
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-36 bg-white border rounded-xl shadow-lg z-50">
 
@@ -102,17 +176,18 @@ function PostCard({
 
               </div>
             )}
-
           </div>
         )}
       </div>
 
       {/* CONTENT */}
       <div className="px-4 pb-4">
-        <p className="text-slate-700 text-sm leading-relaxed">
+        <p className="text-slate-700 text-sm">
           {post.content}
         </p>
       </div>
+
+      {/* IMAGE */}
       {post.image && (
         <div className="w-full max-h-[450px] overflow-hidden bg-black flex items-center justify-center">
           <img
@@ -123,22 +198,96 @@ function PostCard({
         </div>
       )}
 
-      {/* BOTTOM ACTIONS */}
-      <div className="flex justify-between text-slate-600 border-t px-4 py-2">
+      {/* ACTIONS */}
+      <div className="flex justify-between border-t px-4 py-2 text-slate-600">
 
-        <button className="flex-1 hover:bg-slate-100 py-2 rounded-lg">
-          👍 Like
+        {/* LIKE */}
+        <button
+          onClick={handleLike}
+          className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-100"
+        >
+          <Heart
+            size={18}
+            className={liked ? "fill-red-500 text-red-500" : ""}
+          />
+
+          Like
+
+          {likesCount > 0 && (
+            <span className="text-xs">({likesCount})</span>
+          )}
         </button>
 
-        <button className="flex-1 hover:bg-slate-100 py-2 rounded-lg">
+        {/* COMMENT */}
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className="flex-1 hover:bg-slate-100 py-2 rounded-lg"
+        >
           💬 Comment
         </button>
 
+        {/* SHARE */}
         <button className="flex-1 hover:bg-slate-100 py-2 rounded-lg">
           🔁 Share
         </button>
 
       </div>
+
+      {/* COMMENTS */}
+      {showComments && (
+        <div className="border-t p-4 space-y-4">
+
+          {/* INPUT */}
+          <div className="flex gap-2">
+
+            <input
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Write a comment..."
+              className="flex-1 border rounded-xl px-4 py-2 outline-none"
+            />
+
+            <button
+              onClick={handleComment}
+              className="bg-blue-900 text-white px-4 rounded-xl"
+            >
+              Post
+            </button>
+
+          </div>
+
+          {/* LIST */}
+          <div className="space-y-3">
+
+            {comments?.map((comment) => (
+              <div key={comment.ID} className="flex gap-3">
+
+                {comment.user?.avatar ? (
+                  <img
+                    src={comment.user.avatar}
+                    className="w-9 h-9 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-slate-300 flex items-center justify-center text-sm font-semibold">
+                    {comment.user?.username?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                )}
+
+                <div className="bg-slate-100 rounded-2xl px-4 py-2 flex-1">
+                  <p className="font-semibold text-sm">
+                    {comment.user?.username}
+                  </p>
+                  <p className="text-sm text-slate-700">
+                    {comment.content}
+                  </p>
+                </div>
+
+              </div>
+            ))}
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

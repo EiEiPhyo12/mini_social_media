@@ -7,6 +7,7 @@ import EditPostModal from "../components/profile/EditPostModal";
 import Sidebar from "../components/sidebar/Sidebar";
 import Trending from "../components/feed/Trending";
 import CreatePost from "../components/posts/CreatePost";
+import SuggestedFriends from "../components/sidebar/SuggestedFriends";
 // import PostCard from "../components/PostCard";
 
 function HomePage() {
@@ -166,47 +167,7 @@ function HomePage() {
               People You May Know
             </h3>
 
-            <div className="space-y-3">
-
-              {["Aye", "Min", "Soe"].map((name) => (
-
-                <div
-                  key={name}
-                  className="
-                    flex
-                    items-center
-                    justify-between
-                  "
-                >
-
-                  <div className="
-                    flex
-                    items-center
-                    gap-2
-                  ">
-                    <div className="
-                      w-8
-                      h-8
-                      bg-slate-300
-                      rounded-full
-                    "></div>
-
-                    <p className="text-sm">
-                      {name}
-                    </p>
-                  </div>
-
-                  <button className="
-                    text-blue-900
-                    text-sm
-                  ">
-                    Add
-                  </button>
-
-                </div>
-              ))}
-
-            </div>
+            <SuggestedFriends />
 
           </div>
 

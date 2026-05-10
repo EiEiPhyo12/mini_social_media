@@ -38,7 +38,25 @@ function ProfilePage() {
   const [newContent, setNewContent] = useState("");
 
   const [newImage, setNewImage] = useState(null);
+  const token = localStorage.getItem("token");
 
+  let currentUserId = null;
+
+  if (token) {
+
+    try {
+
+      const payload = JSON.parse(
+        atob(token.split(".")[1])
+      );
+
+      currentUserId = payload.userId;
+
+    } catch (err) {
+
+      console.error("Invalid token");
+    }
+  }
   const {
 
     editingPost,
@@ -312,6 +330,7 @@ function ProfilePage() {
 
         <PostsGrid
           posts={posts}
+          currentUserId={currentUserId}
           handleDeletePost={handleDeletePost}
           openEditPost={openEditPost}
         />

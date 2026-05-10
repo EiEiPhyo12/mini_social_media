@@ -2,6 +2,7 @@ import PostCard from "./PostCard";
 
 function PostsGrid({
   posts,
+  currentUserId,
   handleDeletePost,
   openEditPost
 }) {
@@ -17,6 +18,7 @@ function PostsGrid({
           <PostCard
             key={post.ID}
             post={post}
+            currentUserId={currentUserId}
             handleDeletePost={
               handleDeletePost
             }

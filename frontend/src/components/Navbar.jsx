@@ -49,7 +49,7 @@ function Navbar() {
 
         {/* LOGO */}
         <div
-          onClick={() => navigate("/home")}
+          onClick={() => navigate("/")}
           className="text-xl font-bold text-blue-900 cursor-pointer"
         >
           SocialNest
