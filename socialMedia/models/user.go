@@ -12,5 +12,5 @@ type User struct {
 	Bio    string `json:"bio"`
 	Avatar string `json:"avatar"`
 
-	Posts []Post `json:"-" gorm:"foreignKey:UserID"`
+	Posts []Post `json:"posts" gorm:"foreignKey:UserID"`
 }
