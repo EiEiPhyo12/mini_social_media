@@ -1,203 +1,136 @@
 import {
   Heart,
-  MessageCircle,
-  Share2,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
 } from "lucide-react";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import API from "../../services/api";
 
 function PostActions({
   post,
   currentUserId,
-  openEditPost,
-  handleDeletePost,
+  showComments,
+  setShowComments,
+  commentsCount,
 }) {
 
-  const [open, setOpen] = useState(false);
+  const [liked, setLiked] =
+    useState(false);
 
-  const menuRef = useRef(null);
+  const [likesCount, setLikesCount] =
+    useState(post.likes?.length || 0);
 
   // =========================
-  // CLOSE ON OUTSIDE CLICK
+  // CHECK LIKE
   // =========================
 
   useEffect(() => {
 
-    const handleClickOutside = (e) => {
+    if (!post.likes) return;
 
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target)
-      ) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
+    const hasLiked =
+      post.likes.some(
+        (like) =>
+          like.user_id === currentUserId
       );
-    };
 
-  }, []);
+    setLiked(hasLiked);
+
+  }, [post.likes, currentUserId]);
 
   // =========================
-  // CHECK OWNER
+  // HANDLE LIKE
   // =========================
 
-  const isOwner = post.user_id === currentUserId;
+  const handleLike = async () => {
+
+    try {
+
+      await API.post(
+        `/posts/${post.ID}/like`
+      );
+
+      if (liked) {
+
+        setLiked(false);
+
+        setLikesCount(
+          (prev) => prev - 1
+        );
+
+      } else {
+
+        setLiked(true);
+
+        setLikesCount(
+          (prev) => prev + 1
+        );
+      }
+
+    } catch (err) {
+
+      console.error(err);
+    }
+  };
 
   return (
 
-    <div className="border-t mt-4 pt-2">
+    <div className="flex justify-between border-t px-4 py-2 text-slate-600">
 
-      {/* =========================
-          LIKE / COMMENT / SHARE
-      ========================= */}
-      <div className="
-        flex
-        items-center
-        justify-between
-      ">
+      {/* LIKE */}
+      <button
+        onClick={handleLike}
+        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-100"
+      >
 
-        <button className="
-          flex
-          items-center
-          gap-2
-          flex-1
-          justify-center
-          py-2
-          rounded-lg
-          hover:bg-slate-100
-          text-slate-600
-        ">
-          <Heart size={18} />
-          <span className="text-sm">Like</span>
-        </button>
+        <Heart
+          size={18}
+          className={
+            liked
+              ? "fill-red-500 text-red-500"
+              : ""
+          }
+        />
 
-        <button className="
-          flex
-          items-center
-          gap-2
-          flex-1
-          justify-center
-          py-2
-          rounded-lg
-          hover:bg-slate-100
-          text-slate-600
-        ">
-          <MessageCircle size={18} />
-          <span className="text-sm">Comment</span>
-        </button>
+        Like
 
-        <button className="
-          flex
-          items-center
-          gap-2
-          flex-1
-          justify-center
-          py-2
-          rounded-lg
-          hover:bg-slate-100
-          text-slate-600
-        ">
-          <Share2 size={18} />
-          <span className="text-sm">Share</span>
-        </button>
+        {likesCount > 0 && (
 
-      </div>
+          <span className="text-xs">
+            ({likesCount})
+          </span>
+        )}
 
-      {/* =========================
-          OWNER 3-DOT MENU
-      ========================= */}
+      </button>
 
-      {isOwner && (
+      {/* COMMENT */}
+      <button
+        onClick={() =>
+          setShowComments(
+            !showComments
+          )
+        }
+        className="flex-1 hover:bg-slate-100 py-2 rounded-lg"
+      >
 
-        <div className="relative flex justify-end mt-2" ref={menuRef}>
+        💬 Comment
 
-          {/* 3 DOT BUTTON */}
-          <button
-            onClick={() => setOpen(!open)}
-            className="
-              p-2
-              rounded-full
-              hover:bg-slate-100
-            "
-          >
-            <MoreHorizontal size={18} />
-          </button>
+        {commentsCount > 0 && (
 
-          {/* DROPDOWN */}
-          {open && (
+          <span className="text-xs text-slate-500 ml-1">
+            ({commentsCount})
+          </span>
+        )}
 
-            <div className="
-              absolute
-              right-0
-              top-8
-              w-36
-              bg-white
-              border
-              rounded-xl
-              shadow-lg
-              z-50
-              overflow-hidden
-            ">
+      </button>
 
-              <button
-                onClick={() => {
-                  openEditPost(post);
-                  setOpen(false);
-                }}
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  w-full
-                  px-3
-                  py-2
-                  text-sm
-                  hover:bg-slate-100
-                "
-              >
-                <Pencil size={16} />
-                Edit
-              </button>
-
-              <button
-                onClick={() => {
-                  handleDeletePost(post.ID);
-                  setOpen(false);
-                }}
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  w-full
-                  px-3
-                  py-2
-                  text-sm
-                  text-red-600
-                  hover:bg-slate-100
-                "
-              >
-                <Trash2 size={16} />
-                Delete
-              </button>
-
-            </div>
-          )}
-
-        </div>
-      )}
+      {/* SHARE */}
+      <button className="flex-1 hover:bg-slate-100 py-2 rounded-lg">
+        🔁 Share
+      </button>
 
     </div>
   );

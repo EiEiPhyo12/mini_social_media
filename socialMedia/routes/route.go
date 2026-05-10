@@ -27,6 +27,9 @@ func SetupRoutes(router *gin.Engine) {
 			"/comments/:id",
 			handlers.DeleteComment,
 		)
+		auth.PUT(
+			"/comments/:id", handlers.UpdateComment,
+		)
 		auth.POST(
 			"/posts/:id/like",
 			handlers.ToggleLike,

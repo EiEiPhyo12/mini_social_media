@@ -70,6 +70,57 @@ func CreateComment(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, comment)
 }
+func UpdateComment(c *gin.Context) {
+
+	userID := uint(
+		c.MustGet("user_id").(float64),
+	)
+
+	commentID := c.Param("id")
+
+	var body struct {
+		Content string `json:"content"`
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid request",
+		})
+
+		return
+	}
+
+	var comment models.Comment
+
+	if err := config.DB.First(
+		&comment,
+		commentID,
+	).Error; err != nil {
+
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Comment not found",
+		})
+
+		return
+	}
+
+	// OWNER CHECK
+	if comment.UserID != userID {
+
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Unauthorized",
+		})
+
+		return
+	}
+
+	comment.Content = body.Content
+
+	config.DB.Save(&comment)
+
+	c.JSON(http.StatusOK, comment)
+}
 
 func DeleteComment(c *gin.Context) {
 

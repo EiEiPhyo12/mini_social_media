@@ -66,12 +66,13 @@ function LoginPage() {
       );
 
       // Redirect to Home
-      navigate("/home", {
+      navigate("/", {
         state: {
           message: "Login successful 🎉 Welcome back!",
           type: "success",
         },
       });
+      alert("Login successful 🎉 Welcome back!");
 
     } catch (err) {
 

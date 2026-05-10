@@ -36,6 +36,7 @@ function PostCard({
   const [commentText, setCommentText] =
     useState("");
   const [comments, setComments] = useState(post.comments || []);
+  const [commentsCount, setCommentsCount] = useState(post.comments_count || post.comments?.length || 0);
   const menuRef = useRef(null);
 
 
@@ -138,6 +139,10 @@ function PostCard({
       setComments((prev) => [...prev, res.data]);
 
       setCommentText("");
+      // UPDATE COUNT
+      setCommentsCount(
+        (prev) => prev + 1
+      );
 
     } catch (err) {
       console.error(err);
@@ -282,7 +287,7 @@ function PostCard({
           </span>
 
           <span>
-            {post.comments?.length || 0}
+            {commentsCount || 0}
             {" "}
             Comments
           </span>
