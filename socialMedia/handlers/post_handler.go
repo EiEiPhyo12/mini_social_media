@@ -13,12 +13,18 @@ import (
 
 func GetMyPosts(c *gin.Context) {
 
-	userID := c.MustGet("user_id").(float64)
+	userID := uint(
+		c.MustGet("user_id").(float64),
+	)
 
 	var posts []models.Post
 
 	result := config.DB.
-		Where("user_id = ?", uint(userID)).
+		Preload("User").
+		Preload("Likes").
+		Preload("Comments").
+		Preload("Comments.User").
+		Where("user_id = ?", userID).
 		Order("created_at desc").
 		Find(&posts)
 
@@ -100,7 +106,7 @@ func GetAllPosts(c *gin.Context) {
 		Preload("Likes").
 		Preload("Comments").
 		Preload("Comments.User").
-		Order("created_at desc").
+		Order("posts.created_at DESC").
 		Find(&posts).Error
 
 	if err != nil {
@@ -108,8 +114,19 @@ func GetAllPosts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to fetch posts",
 		})
-
 		return
+	}
+
+	// ADD COMMENT COUNT SEPARATELY
+	for i := range posts {
+
+		var count int64
+
+		config.DB.Model(&models.Comment{}).
+			Where("post_id = ?", posts[i].ID).
+			Count(&count)
+
+		posts[i].CommentsCount = count
 	}
 
 	c.JSON(http.StatusOK, posts)

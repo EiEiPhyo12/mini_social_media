@@ -21,14 +21,23 @@ func SetupRoutes(router *gin.Engine) {
 
 		auth.GET("/posts", handlers.GetAllPosts)
 
-		auth.POST("/posts/:id/like",
-			handlers.ToggleLike)
-
-		auth.POST("/posts/:id/comment",
+		auth.POST("/posts/:id/comments",
 			handlers.CreateComment)
+		auth.DELETE(
+			"/comments/:id",
+			handlers.DeleteComment,
+		)
+		auth.POST(
+			"/posts/:id/like",
+			handlers.ToggleLike,
+		)
 		auth.GET("/myposts", handlers.GetMyPosts)
 		auth.POST("/posts", handlers.CreatePost)
 		auth.PATCH("/posts/:id", handlers.UpdatePost)
 		auth.DELETE("/posts/:id", handlers.DeletePost)
+		auth.GET(
+			"/users/suggestions",
+			handlers.GetSuggestedUsers,
+		)
 	}
 }

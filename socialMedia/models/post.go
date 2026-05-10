@@ -10,7 +10,8 @@ type Post struct {
 
 	UserID uint `json:"user_id"`
 
-	User     User      `json:"user"`
-	Likes    []Like    `json:"likes"`
-	Comments []Comment `json:"comments"`
+	User          User      `json:"user"`
+	Likes         []Like    `json:"likes"`
+	Comments      []Comment `json:"comments"`
+	CommentsCount int64     `json:"comments_count" gorm:"-"`
 }
