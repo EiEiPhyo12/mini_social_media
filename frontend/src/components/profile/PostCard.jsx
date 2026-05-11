@@ -37,25 +37,28 @@ function PostCard({
     useState("");
   const [comments, setComments] = useState(post.comments || []);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || post.comments?.length || 0);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingText, setEditingText] = useState("");
   const menuRef = useRef(null);
 
 
-  // =====================
-  // CHECK IF LIKED
-  // =====================
-
   useEffect(() => {
+    const likes = post.likes || [];
 
-    if (!post.likes) return;
+    const hasLiked = likes.some(
+      (like) =>
+        String(like.user_id) ===
+        String(currentUserId)
+    );
+    console.log("current user:", currentUserId);
+    console.log("liked user:", likes.map(l => l.user_id));
 
-    const hasLiked =
-      post.likes.some(
-        (like) =>
-          like.user_id === currentUserId
-      );
+
+    console.log(hasLiked);
+
 
     setLiked(hasLiked);
-
+    setLikesCount(likes.length);
   }, [post.likes, currentUserId]);
 
   // =====================
@@ -126,6 +129,7 @@ function PostCard({
       console.error(err);
     }
   };
+
   const handleComment = async () => {
     if (!commentText.trim()) return;
 
@@ -149,6 +153,46 @@ function PostCard({
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+
+    try {
+
+      await API.delete(`/comments/${commentId}`);
+
+      setComments((prev) =>
+        prev.filter((c) => c.ID !== commentId)
+      );
+
+      setCommentsCount((prev) => prev - 1);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEditComment = async (commentId) => {
+
+    try {
+
+      await API.put(`/comments/${commentId}`, {
+        content: editingText,
+      });
+
+      setComments((prev) =>
+        prev.map((c) =>
+          c.ID === commentId
+            ? { ...c, content: editingText }
+            : c
+        )
+      );
+
+      setEditingCommentId(null);
+      setEditingText("");
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
 
     <div className="bg-white rounded-2xl shadow border overflow-hidden">
@@ -318,7 +362,6 @@ function PostCard({
               transition
             "
           >
-
             <Heart
               size={18}
               className={
@@ -403,47 +446,118 @@ function PostCard({
 
             <div className="space-y-3">
 
-              {comments?.map((comment) => (
+              {comments?.map((comment) => {
 
-                <div
-                  key={comment.ID}
-                  className="flex gap-3"
-                >
+                const isOwner =
+                  comment.user_id === currentUserId;
 
-                  {comment.user?.avatar ? (
-                    <img
-                      src={comment.user.avatar}
-                      className="w-9 h-9 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded-full bg-slate-300 flex items-center justify-center text-sm font-semibold">
-                      {comment.user?.username?.charAt(0).toUpperCase() || "U"}
+                const isEditing =
+                  editingCommentId === comment.ID;
+
+                return (
+
+                  <div
+                    key={comment.ID}
+                    className="flex gap-3 group"
+                  >
+
+                    {/* AVATAR */}
+                    {comment.user?.avatar ? (
+                      <img
+                        src={comment.user.avatar}
+                        className="w-9 h-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-slate-300 flex items-center justify-center text-sm font-semibold">
+                        {comment.user?.username?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                    )}
+
+                    {/* COMMENT BOX */}
+                    <div className="bg-slate-100 rounded-2xl px-4 py-2 flex-1 relative">
+
+                      {/* USERNAME */}
+                      <p className="font-semibold text-sm">
+                        {comment.user?.username}
+                      </p>
+
+                      {/* EDIT MODE */}
+                      {isEditing ? (
+
+                        <div className="flex gap-2 mt-1">
+
+                          <input
+                            value={editingText}
+                            onChange={(e) =>
+                              setEditingText(e.target.value)
+                            }
+                            className="w-full px-2 py-1 text-sm rounded-lg border"
+                          />
+
+                          <button
+                            onClick={() =>
+                              handleEditComment(comment.ID)
+                            }
+                            className="text-blue-600 text-xs"
+                          >
+                            Save
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              setEditingCommentId(null)
+                            }
+                            className="text-gray-500 text-xs"
+                          >
+                            Cancel
+                          </button>
+
+                        </div>
+
+                      ) : (
+
+                        <p className="text-sm text-slate-700">
+                          {comment.content}
+                        </p>
+                      )}
+
+                      {/* ACTIONS (show on hover) */}
+                      {isOwner && !isEditing && (
+
+                        <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition flex gap-2">
+
+                          {/* EDIT */}
+                          <button
+                            onClick={() => {
+                              setEditingCommentId(comment.ID);
+                              setEditingText(comment.content);
+                            }}
+                            className="text-xs text-blue-600"
+                          >
+                            Edit
+                          </button>
+
+                          {/* DELETE */}
+                          <button
+                            onClick={() =>
+                              handleDeleteComment(comment.ID)
+                            }
+                            className="text-xs text-red-500"
+                          >
+                            Delete
+                          </button>
+
+                        </div>
+                      )}
+
                     </div>
-                  )}
-
-                  <div className="
-            bg-slate-100
-            rounded-2xl
-            px-4
-            py-2
-            flex-1
-          ">
-
-                    <p className="font-semibold text-sm">
-                      {comment.user?.username}
-                    </p>
-
-                    <p className="text-sm text-slate-700">
-                      {comment.content}
-                    </p>
 
                   </div>
 
-                </div>
-              ))}
+                );
+              })}
 
             </div>
-
           </div>
         )}
       </div>

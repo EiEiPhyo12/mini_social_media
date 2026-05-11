@@ -34,6 +34,7 @@ func SetupRoutes(router *gin.Engine) {
 			"/posts/:id/like",
 			handlers.ToggleLike,
 		)
+		auth.GET("/search", handlers.Search)
 		auth.GET("/myposts", handlers.GetMyPosts)
 		auth.POST("/posts", handlers.CreatePost)
 		auth.PATCH("/posts/:id", handlers.UpdatePost)
@@ -42,5 +43,10 @@ func SetupRoutes(router *gin.Engine) {
 			"/users/suggestions",
 			handlers.GetSuggestedUsers,
 		)
+
+		auth.GET("/users/:id", handlers.GetUser)
+		router.GET("/users/:id/posts", handlers.GetUserPosts)
+		auth.GET("/posts/:id", handlers.GetPost)
+
 	}
 }

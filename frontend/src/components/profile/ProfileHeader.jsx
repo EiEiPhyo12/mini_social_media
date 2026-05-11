@@ -1,6 +1,7 @@
 function ProfileHeader({
   user,
   postsCount,
+  likesCount,
   openEditModal,
 }) {
 
@@ -16,14 +17,31 @@ function ProfileHeader({
             <img
               src={user.avatar}
               alt="avatar"
-              className="w-28 h-28 rounded-full object-cover border-4 border-slate-200"
+              className="
+                w-28
+                h-28
+                rounded-full
+                object-cover
+                border-4
+                border-slate-200
+              "
             />
           ) : (
-            <div className="w-28 h-28 rounded-full bg-blue-900 text-white flex items-center justify-center font-semibold">
+            <div className="
+              w-28
+              h-28
+              rounded-full
+              bg-blue-900
+              text-white
+              flex
+              items-center
+              justify-center
+              text-3xl
+              font-bold
+            ">
               {user?.username?.charAt(0).toUpperCase() || "U"}
             </div>
           )}
-
 
           <div>
 
@@ -35,16 +53,31 @@ function ProfileHeader({
               {user?.bio || "No bio yet"}
             </p>
 
-            <div className="flex items-center gap-6 mt-3">
+            {/* STATS */}
+            <div className="flex items-center gap-8 mt-5">
 
+              {/* POSTS */}
               <div>
 
-                <p className="text-xl font-bold text-slate-800">
+                <p className="text-2xl font-bold text-slate-800">
                   {postsCount}
                 </p>
 
                 <p className="text-sm text-slate-500">
                   Posts
+                </p>
+
+              </div>
+
+              {/* LIKES */}
+              <div>
+
+                <p className="text-2xl font-bold text-slate-800">
+                  {likesCount}
+                </p>
+
+                <p className="text-sm text-slate-500">
+                  Likes
                 </p>
 
               </div>
@@ -57,7 +90,15 @@ function ProfileHeader({
 
         <button
           onClick={openEditModal}
-          className="bg-blue-900 text-white px-5 py-3 rounded-xl hover:opacity-90"
+          className="
+            bg-blue-900
+            text-white
+            px-5
+            py-3
+            rounded-xl
+            hover:bg-blue-800
+            transition
+          "
         >
           Edit Profile
         </button>

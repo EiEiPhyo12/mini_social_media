@@ -1,6 +1,7 @@
-import { Bell, Search } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import SearchBar from "./SearchBar";
 
 import API from "../services/api";
 function Navbar() {
@@ -56,29 +57,7 @@ function Navbar() {
         </div>
 
         {/* SEARCH BAR */}
-        <div className="
-          hidden md:flex
-          items-center
-          bg-slate-100
-          px-3
-          py-2
-          rounded-full
-          w-1/3
-        ">
-          <Search size={18} className="text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="
-              bg-transparent
-              outline-none
-              ml-2
-              w-full
-              text-sm
-            "
-          />
-        </div>
-
+        <SearchBar />
         {/* RIGHT SECTION */}
         <div className="flex items-center gap-3">
 

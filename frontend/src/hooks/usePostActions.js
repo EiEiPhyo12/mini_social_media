@@ -98,7 +98,7 @@ function usePostActions(posts, setPosts) {
         `/posts/${editingPost.ID}`,
         formData
       );
-
+      console.log(res.data);
       setPosts(
 
         posts.map((p) =>

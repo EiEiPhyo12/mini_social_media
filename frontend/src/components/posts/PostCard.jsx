@@ -14,8 +14,8 @@ import CommentSection from "./CommentSection";
 function PostCard({
   post,
   currentUserId,
-  openEditPost,
-  handleDeletePost,
+  openEditPost = () => { },
+  handleDeletePost = () => { },
 }) {
 
   const [menuOpen, setMenuOpen] =

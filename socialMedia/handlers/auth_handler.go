@@ -93,3 +93,16 @@ func Login(c *gin.Context) {
 		"token": token,
 	})
 }
+
+func GetUserPosts(c *gin.Context) {
+
+	id := c.Param("id")
+
+	var posts []models.Post
+
+	config.DB.Preload("Likes").Preload("Comments").Preload("Comments.User").Where("user_id = ?", id).
+		Order("created_at desc").
+		Find(&posts)
+
+	c.JSON(200, posts)
+}

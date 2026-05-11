@@ -1,0 +1,33 @@
+# =========================
+# Backend (Go)
+# =========================
+socialMedia/*.exe
+socialMedia/bin/
+
+# Go cache
+*.out
+
+# =========================
+# Frontend (React/Vite)
+# =========================
+frontend/node_modules/
+frontend/dist/
+
+# =========================
+# Uploads
+# =========================
+socialMedia/uploads/
+
+# =========================
+# Environment files
+# =========================
+.env
+.env.local
+.env.development.local
+
+
+# =========================
+# Logs
+# =========================
+*.log
+npm-debug.log*

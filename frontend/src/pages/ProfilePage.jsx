@@ -49,8 +49,9 @@ function ProfilePage() {
       const payload = JSON.parse(
         atob(token.split(".")[1])
       );
-
-      currentUserId = payload.userId;
+      console.log("payload:", payload);
+      currentUserId = payload.user_id;
+      console.log("current user id:", currentUserId);
 
     } catch (err) {
 
@@ -134,6 +135,7 @@ function ProfilePage() {
     try {
 
       const res = await API.get("/myposts");
+      console.log(res);
 
       setPosts(res.data);
 
@@ -304,7 +306,15 @@ function ProfilePage() {
 
 
 
+  // =====================
+  // TOTAL LIKES
+  // =====================
 
+  const totalLikes = posts.reduce(
+    (total, post) =>
+      total + (post.likes?.length || 0),
+    0
+  );
 
   return (
 
@@ -317,6 +327,7 @@ function ProfilePage() {
         <ProfileHeader
           user={user}
           postsCount={posts.length}
+          likesCount={totalLikes}
           openEditModal={openEditModal}
         />
 

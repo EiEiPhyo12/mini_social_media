@@ -22,6 +22,7 @@ function PostsGrid({
             handleDeletePost={
               handleDeletePost
             }
+
             openEditPost={openEditPost}
           />
         ))

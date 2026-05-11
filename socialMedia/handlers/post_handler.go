@@ -148,7 +148,7 @@ func UpdatePost(c *gin.Context) {
 	// FIND POST
 	// ======================
 
-	result := config.DB.First(
+	result := config.DB.Preload("User").Preload("Likes").Preload("Comments").Preload("Comments.User").First(
 		&post,
 		postID,
 	)
